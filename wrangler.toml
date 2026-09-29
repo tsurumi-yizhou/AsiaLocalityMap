@@ -1,0 +1,20 @@
+name = "asia-locality-map"
+main = "src/worker.js"
+compatibility_date = "2025-09-23"
+
+# 部署到 workers.dev 供预览
+# 注意：这些必须写在 [assets] 之前。TOML 的表头之后的键都归属该表。
+workers_dev = true
+preview_urls = true
+
+# 静态资源来自 docs/，无需构建步骤
+[assets]
+directory = "./docs"
+binding = "ASSETS"
+not_found_handling = "404-page"
+
+# 把自定义域名绑到这个 Worker。
+# custom_domain = true 会由 Cloudflare 自动创建 DNS 记录并签发证书。
+[[routes]]
+pattern = "map.locality.asia"
+custom_domain = true

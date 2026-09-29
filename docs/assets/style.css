@@ -1,0 +1,507 @@
+/* 此地 · Asia Locality Map — 文档站点
+   现代版式 + 古风气质：宣纸底、墨色字、宋体标题、朱砂细节点缀。
+   不用插图与彩色块，留白与细线承担层级。 */
+
+:root {
+  /* 墨与纸 */
+  --paper: #faf8f3;
+  --paper-raised: #fffdf8;
+  --ink: #1c1a17;
+  --ink-soft: #55504a;
+  --ink-faint: #8b8479;
+  --line: #e4ded1;
+  --line-strong: #c9c0ad;
+  --cinnabar: #9a3b2c; /* 朱砂，仅作点睛 */
+  --seal: #a03a2b;
+
+  --measure: 44rem;
+  --font-serif: "Songti SC", "Source Han Serif SC", "Noto Serif CJK SC",
+    "STSong", "Times New Roman", Georgia, serif;
+  --font-sans: "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC",
+    "Microsoft YaHei", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5.5rem;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 极淡的纸纹：两层重复渐变，不用图片 */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+      0deg,
+      rgba(120, 110, 92, 0.028) 0 1px,
+      transparent 1px 3px
+    ),
+    radial-gradient(
+      120% 80% at 50% 0%,
+      rgba(255, 255, 255, 0.75),
+      transparent 60%
+    );
+}
+
+.wrap {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 0 1.6rem;
+}
+
+/* ---------- 页头 ---------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(250, 248, 243, 0.9);
+  backdrop-filter: saturate(140%) blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+
+.site-header .wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  min-height: 3.75rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+/* 印章：细边方框，模拟钤印 */
+.seal {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 1px solid var(--seal);
+  border-radius: 2px;
+  color: var(--seal);
+  font-family: var(--font-serif);
+  font-size: 0.85rem;
+  line-height: 1;
+  padding-bottom: 0.05em;
+  flex: none;
+}
+
+.brand-text {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+}
+
+.brand-sub {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  color: var(--ink-faint);
+  white-space: nowrap;
+  padding-left: 0.7rem;
+  margin-left: 0.1rem;
+  border-left: 1px solid var(--line-strong);
+}
+
+.site-nav {
+  display: flex;
+  gap: 1.4rem;
+  font-size: 0.85rem;
+}
+
+.site-nav a {
+  position: relative;
+  color: var(--ink-soft);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  padding: 0.2rem 0;
+}
+
+.site-nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.1rem;
+  height: 1px;
+  background: var(--cinnabar);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.22s ease;
+}
+
+.site-nav a:hover {
+  color: var(--ink);
+}
+
+.site-nav a:hover::after,
+.site-nav a[aria-current="page"]::after {
+  transform: scaleX(1);
+}
+
+.site-nav a[aria-current="page"] {
+  color: var(--ink);
+}
+
+@media (max-width: 700px) {
+  .brand-sub {
+    display: none;
+  }
+  .site-nav {
+    gap: 0.95rem;
+    font-size: 0.8rem;
+  }
+  .site-header .wrap {
+    min-height: 3.25rem;
+  }
+}
+
+/* ---------- 主体 ---------- */
+
+main {
+  padding: 4.5rem 0 5rem;
+}
+
+h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(1.85rem, 5.5vw, 2.45rem);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0.06em;
+  margin: 0 0 1rem;
+}
+
+/* 标题下的短朱砂横线，古谱中的"鱼尾"意象 */
+h1::after {
+  content: "";
+  display: block;
+  width: 2.6rem;
+  height: 2px;
+  margin-top: 1.4rem;
+  background: var(--cinnabar);
+}
+
+h2 {
+  font-family: var(--font-serif);
+  font-size: 1.24rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  margin: 3.5rem 0 1.2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+/* 章节序号：小字朱砂 */
+h2 .idx {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--cinnabar);
+  flex: none;
+}
+
+h3 {
+  font-family: var(--font-serif);
+  font-size: 1.02rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  margin: 2rem 0 0.8rem;
+}
+
+/* 引首：首页大标题下的说明 */
+.lede {
+  font-size: 1.02rem;
+  line-height: 1.95;
+  color: var(--ink-soft);
+  margin-bottom: 1.5rem;
+}
+
+p {
+  margin: 0 0 1.15rem;
+  text-align: justify;
+}
+
+ul,
+ol {
+  margin: 0 0 1.3rem;
+  padding-left: 1.35rem;
+}
+
+li {
+  margin-bottom: 0.6rem;
+  text-align: justify;
+}
+
+li::marker {
+  color: var(--ink-faint);
+}
+
+a {
+  color: var(--ink);
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  text-decoration-color: var(--cinnabar);
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: rgba(120, 110, 92, 0.07);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 0.08em 0.35em;
+}
+
+pre {
+  font-family: var(--font-mono);
+  font-size: 0.81rem;
+  line-height: 1.75;
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 1.1rem 1.2rem;
+  overflow-x: auto;
+  margin: 0 0 1.5rem;
+}
+
+pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* ---------- 表格 ---------- */
+
+.table-scroll {
+  overflow-x: auto;
+  margin-bottom: 1.7rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.89rem;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.7rem 0.95rem 0.7rem 0;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+th {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--line-strong);
+  white-space: nowrap;
+}
+
+td.num,
+th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  padding-right: 0;
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+caption {
+  caption-side: bottom;
+  text-align: left;
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+  line-height: 1.7;
+  padding-top: 0.8rem;
+}
+
+/* ---------- 截图 ---------- */
+
+figure {
+  margin: 0 0 1.9rem;
+}
+
+figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: #fff;
+}
+
+figcaption {
+  font-size: 0.82rem;
+  color: var(--ink-faint);
+  line-height: 1.7;
+  padding-top: 0.65rem;
+}
+
+.shot-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: 1.9rem;
+  margin-bottom: 2.5rem;
+}
+
+.shot-group figure {
+  margin: 0;
+}
+
+.phone-shot img {
+  max-width: 15rem;
+  margin: 0 auto;
+}
+
+/* 手机与平板并置，体现自适应对照 */
+.device-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 8.5rem) minmax(0, 1fr);
+  gap: 1.75rem;
+  align-items: start;
+  margin-bottom: 2.25rem;
+  padding-bottom: 2.25rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.device-pair:last-of-type {
+  border-bottom: 0;
+}
+
+.device-pair figure {
+  margin: 0;
+}
+
+.device-pair .phone-shot img {
+  max-width: 8.5rem;
+}
+
+.device-tag {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+  padding-bottom: 0.5rem;
+}
+
+@media (max-width: 560px) {
+  .device-pair {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .device-pair .phone-shot img {
+    max-width: 11rem;
+  }
+}
+
+/* 提示框：左侧朱砂短线 */
+.note {
+  position: relative;
+  font-size: 0.89rem;
+  line-height: 1.8;
+  color: var(--ink-soft);
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--cinnabar);
+  border-radius: 3px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.7rem;
+}
+
+.note p:last-child {
+  margin-bottom: 0;
+}
+
+/* 竖排引首，首页用一次 */
+.vertical-mark {
+  writing-mode: vertical-rl;
+  font-family: var(--font-serif);
+  font-size: 0.82rem;
+  letter-spacing: 0.35em;
+  color: var(--ink-faint);
+  border-left: 1px solid var(--line);
+  padding-left: 0.75rem;
+  margin: 0 0 2.5rem auto;
+  height: 8.5rem;
+}
+
+/* ---------- 页脚 ---------- */
+
+.site-footer {
+  border-top: 1px solid var(--line);
+  padding: 2.75rem 0 4rem;
+  font-size: 0.84rem;
+  line-height: 1.9;
+  color: var(--ink-faint);
+}
+
+.site-footer p {
+  margin-bottom: 0.7rem;
+  text-align: left;
+}
+
+.site-footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.1rem;
+  margin-bottom: 1.1rem;
+}
+
+.site-footer a {
+  color: var(--ink-soft);
+}
+
+@media print {
+  .site-header,
+  .site-footer,
+  .vertical-mark {
+    display: none;
+  }
+  body {
+    background: #fff;
+  }
+  body::before {
+    display: none;
+  }
+  main {
+    padding: 0;
+  }
+}

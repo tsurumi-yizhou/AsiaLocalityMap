@@ -1,0 +1,11 @@
+CHGIS, Version 6. (c) Fairbank Center for Chinese Studies of Harvard University and the Center for Historical Geographical Studies at Fudan University, 2016.
+
+『旧国・旧郡境界データセット』（CODH作成）、「幕末明治地勢地図境界データ」（人間文化研究機構作成）を加工。CC BY-NC 4.0. https://geoshape.ex.nii.ac.jp/kg/ doi:10.20676/00000454
+
+「조선시대 행정구역 DB」, 역지사지. https://www.hisgeo.info
+
+Natural Earth land outlines: public domain. https://www.naturalearthdata.com
+
+AR PL KaitiM GB: Arphic Technology. Original license included at fonts/ARPHIC-LICENSE.txt.
+
+Local research demo. Original and processed data retain their respective source terms. See docs/data-rights.html in the project for dataset-specific restrictions and references.
