@@ -235,7 +235,7 @@ class MapData private constructor(
                 for (i in 0 until coast.length()) add(Feature(JSONObject().put("geometry", coast.getJSONObject(i))))
             }
             val references = referenceYears(context).getJSONObject(year.toString())
-            return MapData(features, land, year, listOf("cn", "kr", "jp", "vn").associateWith {
+            return MapData(features, land, year, references.keys().asSequence().associateWith {
                 if (references.isNull(it)) null else references.getInt(it)
             })
         }

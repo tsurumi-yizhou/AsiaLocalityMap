@@ -21,18 +21,19 @@ from shapely.prepared import prep
 from history_periods import CATALOG, YEARS, REGION_CODES, DEFAULT_YEAR, period_at, reference_years, reference_layer_available
 from historical_territories import region as territory_region, CN_POLITIES, VIETNAM_CONTEXT
 from prefecture_names import PrefectureNames
-from korean_boundaries import load_upper_areas, GORYEO_YEAR, SOURCE_BASES
+from korean_boundaries import load_upper_areas, SILLA_YEAR, GORYEO_YEAR, SOURCE_BASES
 from korean_periods import ROWS as KOREAN_CENTERS, SILLA_SOURCE, GORYEO_SOURCE
 from historical_names import korean_name, korean_native, search_names, GROUP_ALIASES
 from display_geometry import simplify_areas, simplify_land, counts as geometry_counts
 from boundary_topology import compile_directory
-from fileutil import sha256_file
+from fileutil import json_text, sha256_file, write_json
 
 ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / "data/raw"
 OUT = ROOT / "data/processed"
 APP = OUT / "android"
 CHGIS_OPEN_END_YEAR = 1914  # CHGIS and Ming military rows past this year are open-ended placeholders.
+SUPERSEDED_PREFECTURES = {"永平府"}  # Replaced by the adjoining Ming atlas reference pair at DEFAULT_YEAR.
 JOSEON_REFERENCE_YEAR = 1864  # Single dated snapshot used for the Japan and Korea references.
 # Reference years, not dynasty-wide unions or claims of political ownership.
 PERIODS = {p["id"]: p["year"] for p in CATALOG if p["region"] == "cn"}
@@ -55,7 +56,7 @@ CREATE TABLE display_snapshot(feature_id TEXT REFERENCES feature(id), context_ye
 
 
 def dump(value):
-    return json.dumps(value, ensure_ascii=False, separators=(",", ":"), default=str)
+    return json_text(value, compact=True, default=str)
 
 
 def read_shp(archive, token=None):
@@ -249,7 +250,7 @@ def main():
               "cn", "都司辖区参考" if name == "辽东都司" else "府级辖区参考", name,
               dict(source["properties"], source_year=1582, original_layer="ming-ad1582",
                    reviewed_scope="adjoining Yongping-Liaodong source pair"),
-              shape(source["geometry"]), years=[1585], periods=["ming"], rank=1,
+              shape(source["geometry"]), years=[DEFAULT_YEAR], periods=["ming"], rank=1,
               system="军事" if name == "辽东都司" else "民政", geometry_year=1582,
               flags=["third_party_atlas_reference", "individual_garrison_boundaries_unavailable"],
               subtitle="1582年永平府—辽东都司同源参考面，用于1585年明代背景；不是逐卫、逐县界。未强行贴合异年朝鲜边界。")
@@ -257,14 +258,14 @@ def main():
     # Daning moved to Baoding in 1403. Represent the documented host city only;
     # neither the old frontier area nor a precise office-site coordinate is implied.
     host = con.execute("SELECT id,source_id,geometry_json FROM feature WHERE source='chgis-pref-point' "
-                       "AND name='保定府' AND begin_year<=1585 AND end_year>=1585").fetchall()
+                       f"AND name='保定府' AND begin_year<={DEFAULT_YEAR} AND end_year>={DEFAULT_YEAR}").fetchall()
     if len(host) != 1:
         raise ValueError("Ambiguous Baoding host-city reference")
     anchor_id, anchor_source_id, host_geometry = host[0]
     store("ming-daning-seat:baoding", "ming-daning-seat", "daning-at-baoding", "cn", "都司驻城参考", "大宁都司",
           {"host_city":"保定府", "host_feature_id":anchor_id, "host_source_id":anchor_source_id,
            "move_year":1403, "position_basis":"CHGIS prefectural seat as a city reference, not the military office location"},
-          shape(json.loads(host_geometry)), years=[1585], periods=["ming"], rank=1, system="军事", parent="保定府",
+          shape(json.loads(host_geometry)), years=[DEFAULT_YEAR], periods=["ming"], rank=1, system="军事", parent="保定府",
           flags=["host_city_reference_not_office_site"],
           subtitle="1403年迁驻保定；以有来源的保定府治坐标表示驻城，非都司衙署实测位置。不将明初大宁旧辖区套用于晚明。")
 
@@ -303,7 +304,7 @@ def main():
 
     # These early references supply administrative names and centers only.
     for i, (year, kind, name, native, lon, lat, citation) in enumerate(KOREAN_CENTERS):
-        period = "silla" if year == 757 else "goryeo"
+        period = "silla" if year == SILLA_YEAR else "goryeo"
         store(f"korea-{period}:{i}", f"korea-{period}", str(i), "kr", kind, name,
               {"citation": citation, "coordinate_basis": "approximate reference city"},
               Point(lon, lat), year, year, years=[year], rank=2 if "小京" in kind or "牧治" in kind else 1,
@@ -418,7 +419,7 @@ def main():
 
     # Import complete source boundaries; bundled maps retain trace/date provenance.
     # Neither polity outlines nor later borders fill any missing province.
-    for year in (757, GORYEO_YEAR):
+    for year in (SILLA_YEAR, GORYEO_YEAR):
         areas = load_upper_areas(RAW, year, bundled=ROOT / "data/reference/korean-upper", require_complete=True)
         source_id = f"korea-upper-source:{year}"
         provenance = areas[0]["source"]
@@ -428,7 +429,7 @@ def main():
         for area in areas:
             fid = f"korea-upper:{year}:{area['key']}"
             attrs = dict(area["attributes"], provenance=area["source"])
-            store(fid, source_id, area["key"], "kr", "州级辖区" if year == 757 else "道／边境区级辖区",
+            store(fid, source_id, area["key"], "kr", "州级辖区" if year == SILLA_YEAR else "道／边境区级辖区",
                   area["name"], attrs, area["geometry"], year, year, years=[year], rank=1,
                   native_name=area["native"], names_by_year={str(year): area["name"]},
                   native_names_by_year={str(year): area["native"]}, geometry_year=provenance.get("map_year"))
@@ -494,7 +495,7 @@ def main():
             if local_year is None or local_year not in feature["years"]:
                 continue
             if feature["region"] == "cn":
-                if cn_year == 1585 and feature["id"].startswith("chgis-pref-polygon:") and feature["name"] == "永平府":
+                if cn_year == DEFAULT_YEAR and feature["id"].startswith("chgis-pref-polygon:") and feature["name"] in SUPERSEDED_PREFECTURES:
                     continue  # Retained in the research DB; the adjoining atlas pair is displayed.
                 geom = source_shapes[feature["id"]]
                 if feature["id"].startswith("zheng-wu-prefecture:"):
@@ -565,7 +566,7 @@ def main():
                         korean_native(row["name"], row["label_id"].removeprefix("hisgeo:"),
                                       row["native_names_by_year"].get(str(local_year))))
                     row["parent"] = row["parents_by_year"].get(str(local_year), row["parent"])
-                if row["region"] == "kr" and local_year in (757, GORYEO_YEAR) and row["geometry"]["type"] != "Point":
+                if row["region"] == "kr" and local_year in (SILLA_YEAR, GORYEO_YEAR) and row["geometry"]["type"] != "Point":
                     if row.get("inferred") or row.get("boundary_basis") not in SOURCE_BASES:
                         raise ValueError(f"Undocumented early Korean boundary in export: {row['id']}")
                 row.pop("names_by_year", None)
@@ -600,8 +601,8 @@ def main():
     light_coast = simplify_land(coast)
     geometry_report["land"] = dict(before=geometry_counts(coast), after=geometry_counts(light_coast))
     (APP / "land.json").write_text(dump([mapping(g) for g in light_coast]))
-    (OUT / "display-geometry.json").write_text(json.dumps(geometry_report, ensure_ascii=False, indent=2))
-    (OUT / "quality.json").write_text(json.dumps({
+    write_json(OUT / "display-geometry.json", geometry_report)
+    write_json(OUT / "quality.json", {
         "counts": stats, "issues": issues,
         "baseline": {"context_year": DEFAULT_YEAR, "regional_years": reference_years(DEFAULT_YEAR)},
         "snapshots": counts_by_year,
@@ -610,11 +611,11 @@ def main():
                     for key, year in PERIODS.items()},
         "limitations": ["China county boundaries missing", "No Taiwan Qing backprojection into earlier periods", "No complete polity/province hierarchy",
                         "Display-only water holes and tiny islands removed; shared-edge VW simplification 0.008 degrees, 0.001-degree grid; no survey accuracy", "Japan post-Meiji district changes not fully resolved"],
-    }, ensure_ascii=False, indent=2))
+    })
     manifest = [{"path": str(p.relative_to(ROOT)), "bytes": p.stat().st_size,
                  "sha256": sha256_file(p)}
                 for p in sorted(RAW.iterdir()) if p.is_file()]
-    (OUT / "input-manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2))
+    write_json(OUT / "input-manifest.json", manifest)
     compile_directory(APP)
     print(json.dumps(stats, ensure_ascii=False, indent=2))
     print(f"Android features: {len(features)}; map: {(APP / 'map.jsonl').stat().st_size / 1024**2:.1f} MiB")

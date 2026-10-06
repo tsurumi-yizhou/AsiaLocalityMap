@@ -20,7 +20,7 @@ from shapely import coverage_simplify, coverage_is_valid, set_precision, STRtree
 from shapely.geometry import box, Polygon, MultiPolygon, Point, LineString, mapping, shape
 from shapely.ops import polygonize, unary_union
 from boundary_topology import encode, decode_geometry
-from fileutil import sha256_file
+from fileutil import sha256_file, write_json
 
 ROOT = Path(__file__).resolve().parents[1]
 REFERENCE = ROOT / 'data/reference/korean-upper'
@@ -31,10 +31,6 @@ NATIVE = {
     '楊廣道': '양광도', '慶尙道': '경상도', '全羅道': '전라도', '西海道': '서해도',
     '交州道': '교주도', '西北面': '서북면', '東北面': '동북면', '京畿': '경기',
 }
-
-
-def write_json(path, obj):
-    path.write_text(json.dumps(obj, ensure_ascii=False, indent=2) + '\n')
 
 
 def crop_mask(mask, config):
@@ -239,7 +235,7 @@ def main():
                 map_year=config['map_year'], date_precision=config['date_precision'],
                 boundary_basis='digitized_published_map')))
         output = REFERENCE / f"korea-upper-{config['year']}.geojson"
-        write_json(output, dict(type='FeatureCollection', features=features))
+        write_json(output, dict(type='FeatureCollection', features=features), newline=True)
         write_json(output.with_suffix('.source.json'), dict(
             year=config['year'], source_url=config['source_url'], rights=f"{config['license']}; {config['author']}; traced and georeferenced adaptation",
             boundary_basis='digitized_published_map', sha256=sha256_file(output),
@@ -248,7 +244,7 @@ def main():
             license_url=config['license_url'], map_year=config['map_year'], date_precision=config['date_precision'],
             dating_evidence=config['dating_evidence'], tracing_method=config['mode'],
             trace_file=f'{period}.trace.json', trace_sha256=sha256_file(REFERENCE / f'{period}.trace.json'),
-            georeferencing=registration, feature_count=len(features)))
+            georeferencing=registration, feature_count=len(features)), newline=True)
         overlay.save(REVIEW / f'{period}-source-overlay.png')
         print(f"{period}: {len(features)} source areas; registration RMS {registration['rms_meters'] / 1000:.2f} km", flush=True)
 

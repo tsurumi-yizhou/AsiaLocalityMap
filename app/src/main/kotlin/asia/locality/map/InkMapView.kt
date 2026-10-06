@@ -472,11 +472,13 @@ class InkMapView @JvmOverloads constructor(
 
     private fun drawName(canvas: Canvas, value: String, x: Float, y: Float, opacity: Float) {
         val color = text.color
+        val alpha = (255 * opacity).roundToInt()
+        // setColor resets alpha, so it is reapplied after each colour change.
         text.style = Paint.Style.STROKE; text.strokeWidth = 4 * density; text.color = Color.WHITE
-        text.alpha = (255 * opacity).roundToInt()
+        text.alpha = alpha
         canvas.drawText(value, x, y, text)
         text.style = Paint.Style.FILL; text.color = color
-        text.alpha = (255 * opacity).roundToInt()
+        text.alpha = alpha
         canvas.drawText(value, x, y, text)
         text.alpha = 255
     }

@@ -9,6 +9,7 @@ from pathlib import Path
 
 from shapely.geometry import shape
 from topojson import Topology
+from fileutil import json_text, write_json
 
 
 def decode_geometry(geometry, arcs):
@@ -73,11 +74,10 @@ def compile_directory(app):
     networks = app / 'boundaries'
     networks.mkdir(exist_ok=True)
     encoded, report = {}, {}
-    compact = dict(ensure_ascii=False, separators=(',', ':'))
     for key, features in groups.items():
         rows = list(features.values())
         encoded[key], arcs = encode(rows, key)
-        (networks / f'{key}.json').write_text(json.dumps(dict(arcs=arcs), **compact))
+        write_json(networks / f'{key}.json', dict(arcs=arcs), compact=True)
         references = defaultdict(set)
         before = 0
         for row in rows:
@@ -100,13 +100,13 @@ def compile_directory(app):
                     shared = encoded[f"{row['region']}-{row['year']}"][row['id']]
                     # Context year and names belong to the snapshot, not the network.
                     row = dict(row, geometry=shared['geometry'], boundary_set=shared['boundary_set'])
-                stream.write(json.dumps(row, **compact) + '\n')
+                stream.write(json_text(row, compact=True) + '\n')
     from history_periods import DEFAULT_YEAR
     (app / 'map.jsonl').write_bytes((app / 'snapshots' / f'{DEFAULT_YEAR}.jsonl').read_bytes())
     for old in networks.glob('*.json'):
         if old.stem not in groups:
             old.unlink()
-    (app.parent / 'boundary-topology.json').write_text(json.dumps(report, ensure_ascii=False, indent=2))
+    write_json(app.parent / 'boundary-topology.json', report)
 
 
 if __name__ == '__main__':

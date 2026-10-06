@@ -12,10 +12,11 @@ from urllib.parse import urlparse
 from shapely.geometry import shape
 from fileutil import sha256_bytes
 
+SILLA_YEAR = 757
 GORYEO_YEAR = 1370
 SOURCE_BASES = {'published_boundary_geometry', 'digitized_published_map'}
 EXPECTED_NAMES = {
-    757: {'尙州', '良州', '康州', '漢州', '朔州', '溟州', '熊州', '全州', '武州'},
+    SILLA_YEAR: {'尙州', '良州', '康州', '漢州', '朔州', '溟州', '熊州', '全州', '武州'},
     GORYEO_YEAR: {'楊廣道', '慶尙道', '全羅道', '西海道', '交州道', '西北面', '東北面', '京畿'},
 }
 

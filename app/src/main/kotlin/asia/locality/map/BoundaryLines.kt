@@ -30,64 +30,74 @@ internal class Bounds {
 }
 
 /** Display-only LOD; the shared projected arcs used by lookup remain untouched. */
-class BoundaryLines private constructor(private val rings: List<DoubleArray>, private val shared: List<BoundaryLines>?) {
-    constructor(rings: List<DoubleArray>) : this(rings, null)
+sealed class BoundaryLines {
     internal val bounds = Bounds()
     internal val minX get() = bounds.minX
     internal val minY get() = bounds.minY
     internal val maxX get() = bounds.maxX
     internal val maxY get() = bounds.maxY
 
-    init {
-        if (shared != null) for (arc in shared) bounds.add(arc.bounds)
-        else for (ring in rings) for (i in ring.indices step 2) bounds.add(ring[i], ring[i + 1])
-    }
-    private class Segment(val vertices: DoubleArray, val first: Int, val last: Int) {
-        val bounds = Bounds().also { box ->
-            for (index in first..last) box.add(vertices[index * 2], vertices[index * 2 + 1])
+    abstract fun appendVisible(buffer: Buffer, pixelsPerDegree: Double,
+                               left: Double, bottom: Double, right: Double, top: Double)
+
+    /** Detail levels for one or more rings, built on first use. */
+    internal class Rings(private val rings: List<DoubleArray>) : BoundaryLines() {
+        private class Segment(val vertices: DoubleArray, val first: Int, val last: Int) {
+            val bounds = Bounds().also { box ->
+                for (index in first..last) box.add(vertices[index * 2], vertices[index * 2 + 1])
+            }
         }
-    }
 
-    // Built on first use: most levels are never drawn, and the result is deterministic,
-    // so a racing duplicate build is harmless.
-    private val levels = if (shared == null) arrayOfNulls<List<Segment>>(tolerances.size) else null
+        init {
+            for (ring in rings) for (i in ring.indices step 2) bounds.add(ring[i], ring[i + 1])
+        }
 
-    private fun level(index: Int): List<Segment> = levels!![index] ?: buildLevel(tolerances[index]).also { levels[index] = it }
+        // Most levels are never drawn and the result is deterministic, so a racing duplicate build is harmless.
+        private val levels = arrayOfNulls<List<Segment>>(tolerances.size)
 
-    private fun buildLevel(tolerance: Double): List<Segment> = buildList {
-        for (ring in rings) {
-            val vertices = simplify(ring, tolerance)
-            val count = vertices.size / 2
-            var first = 0
-            while (first < count - 1) {
-                val last = min(first + 128, count - 1)
-                add(Segment(vertices, first, last))
-                first = last
+        private fun level(index: Int): List<Segment> = levels[index] ?: buildLevel(tolerances[index]).also { levels[index] = it }
+
+        private fun buildLevel(tolerance: Double): List<Segment> = buildList {
+            for (ring in rings) {
+                val vertices = simplify(ring, tolerance)
+                val count = vertices.size / 2
+                var first = 0
+                while (first < count - 1) {
+                    val last = min(first + 128, count - 1)
+                    add(Segment(vertices, first, last))
+                    first = last
+                }
+            }
+        }
+
+        override fun appendVisible(buffer: Buffer, pixelsPerDegree: Double,
+                                   left: Double, bottom: Double, right: Double, top: Double) {
+            val margin = buffer.margin / pixelsPerDegree
+            if (bounds.misses(left, bottom, right, top, margin) || !buffer.include(this)) return
+            val width = (right - left) * pixelsPerDegree
+            val height = (top - bottom) * pixelsPerDegree
+            for (segment in level(buffer.levelFor(pixelsPerDegree))) {
+                if (segment.bounds.misses(left, bottom, right, top, margin)) continue
+                val vertices = segment.vertices
+                for (index in segment.first until segment.last) {
+                    buffer.line((vertices[index * 2] - left) * pixelsPerDegree,
+                        (top - vertices[index * 2 + 1]) * pixelsPerDegree,
+                        (vertices[index * 2 + 2] - left) * pixelsPerDegree,
+                        (top - vertices[index * 2 + 3]) * pixelsPerDegree, width, height)
+                }
             }
         }
     }
 
-    fun appendVisible(buffer: Buffer, pixelsPerDegree: Double,
-                      left: Double, bottom: Double, right: Double, top: Double) {
-        val margin = buffer.margin / pixelsPerDegree
-        // Reject entire areas/arcs before walking references or allocating dedup entries.
-        if (bounds.misses(left, bottom, right, top, margin)) return
-        if (shared != null) {
-            for (arc in shared) arc.appendVisible(buffer, pixelsPerDegree, left, bottom, right, top)
-            return
-        }
-        if (!buffer.include(this)) return
-        val width = (right - left) * pixelsPerDegree
-        val height = (top - bottom) * pixelsPerDegree
-        for (segment in level(buffer.levelFor(pixelsPerDegree))) {
-            if (segment.bounds.misses(left, bottom, right, top, margin)) continue
-            val vertices = segment.vertices
-            for (index in segment.first until segment.last) {
-                buffer.line((vertices[index * 2] - left) * pixelsPerDegree,
-                    (top - vertices[index * 2 + 1]) * pixelsPerDegree,
-                    (vertices[index * 2 + 2] - left) * pixelsPerDegree,
-                    (top - vertices[index * 2 + 3]) * pixelsPerDegree, width, height)
-            }
+    /** An area made of shared arcs; each arc is drawn once per buffer. */
+    private class Group(private val arcs: List<BoundaryLines>) : BoundaryLines() {
+        init { for (arc in arcs) bounds.add(arc.bounds) }
+
+        override fun appendVisible(buffer: Buffer, pixelsPerDegree: Double,
+                                   left: Double, bottom: Double, right: Double, top: Double) {
+            // Reject entire areas before walking arc references.
+            if (bounds.misses(left, bottom, right, top, buffer.margin / pixelsPerDegree)) return
+            for (arc in arcs) arc.appendVisible(buffer, pixelsPerDegree, left, bottom, right, top)
         }
     }
 
@@ -152,7 +162,7 @@ class BoundaryLines private constructor(private val rings: List<DoubleArray>, pr
 
     companion object {
         private val tolerances = doubleArrayOf(0.0, 0.001, 0.002, 0.004, 0.008, 0.016, 0.032, 0.064, 0.128)
-        fun shared(arcs: List<BoundaryLines>): BoundaryLines = BoundaryLines(emptyList(), arcs.distinct())
+        fun shared(arcs: List<BoundaryLines>): BoundaryLines = Group(arcs.distinct())
         /** Iterative Douglas–Peucker in projected coordinates; also preserves ring closure. */
         internal fun simplify(vertices: DoubleArray, tolerance: Double): DoubleArray {
             if (tolerance == 0.0 || vertices.size <= 6) return vertices
@@ -194,3 +204,5 @@ class BoundaryLines private constructor(private val rings: List<DoubleArray>, pr
         }
     }
 }
+
+fun BoundaryLines(rings: List<DoubleArray>): BoundaryLines = BoundaryLines.Rings(rings)
