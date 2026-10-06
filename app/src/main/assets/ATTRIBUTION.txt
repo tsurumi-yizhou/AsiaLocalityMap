@@ -6,6 +6,19 @@ CHGIS, Version 6. (c) Fairbank Center for Chinese Studies of Harvard University 
 
 Natural Earth land outlines: public domain. https://www.naturalearthdata.com
 
-AR PL KaitiM GB: Arphic Technology. Original license included at fonts/ARPHIC-LICENSE.txt.
+AR PL KaitiM GB / Big5: Arphic Technology. Original license included at fonts/ARPHIC-LICENSE.txt.
 
 Local research demo. Original and processed data retain their respective source terms. See docs/data-rights.html in the project for dataset-specific restrictions and references.
+
+Cliopatria v0.2.1, Seshat Global History Databank. CC BY 4.0, https://creativecommons.org/licenses/by/4.0/ . https://github.com/Seshat-Global-History-Databank/cliopatria/tree/v0.2.1 . Used only during preprocessing to screen Chinese dynasty candidates; no polity geometry, names or political borders are displayed or bundled.
+
+Yichen Zheng and Tinghai Wu (2026), County-level population dataset of ancient China in 2, 742, 1102 & 1820 AD. Dataset CC BY 4.0: https://doi.org/10.6084/m9.figshare.30518417 . Only ResearchArea prefectural polygons for 2/742/1102 are used; simulated county boundaries and 1820 data are excluded. Changes: WGS84 reprojection, display simplification, Chinese-name reconciliation with CHGIS and historical texts, quarantine of aggregated or unresolved units. Methods: https://doi.org/10.1038/s41597-026-07086-6 .
+
+Yongping Fu and Liaodong Dusi: two adjoining named administrative references from Yutu, Ming 1582 public map, https://geojsoncn.com/cn-historical-atlas/#f=ming . Site credits Historical Atlas of China. Original rights retained; local research review only, no redistribution license asserted. The source year (1582) is retained separately from the display context (1585); no individual garrison boundaries are inferred.
+Daning Dusi host-city reference: National Museum of China, https://www.chnmuseum.cn/zp/zpml/csp/202008/t20200826_247448.shtml . Approximate host-city location uses the CHGIS Baoding prefectural seat, not a surveyed office-site location.
+
+Early Korean administrative centers: AKS Encyclopedia of Korean Culture (Nine Provinces E0006042, Cities E0015742); National Institute of Korean History (Eight Mok, ta_p51_0030_0020_0020_0010). Manually reviewed names/city correspondences; approximate city points, incomplete county coverage.
+
+Early Korean upper administrative boundaries are digitized from the visible lines and color fields of published maps, with source-derived shorelines and shared arcs transformed once. No Voronoi partition, estimated capital radius, arbitrary frontier cutoff or later-period boundary substitution is used.
+Silla: 9 provinces from GeorgeZhao, "统一新罗图(Unified Silla).jpg", https://commons.wikimedia.org/wiki/File:统一新罗图(Unified_Silla).jpg . Source and digitized adaptation: CC BY-SA 3.0, https://creativecommons.org/licenses/by-sa/3.0/ . The upload revision identifies the 757 province names. Changes: field tracing, cartographic annotation cleanup, geographic registration and shared-edge display simplification.
+Goryeo: 5 circuits, 2 frontier regions and Gyeonggi from Evawen, "高丽五道两界图.jpg", https://commons.wikimedia.org/wiki/File:高丽五道两界图.jpg . Source and digitized adaptation: CC BY-SA 4.0, https://creativecommons.org/licenses/by-sa/4.0/ . Changes: visible boundary tracing, source-pixel shoreline extraction, graticule registration and shared-edge display simplification. The source map supplies a period framework without an exact map year; the application 1370 reference slot is not a claim of annual boundary reconstruction. Source image hashes, trace records and registration residuals accompany the local reference geometry.

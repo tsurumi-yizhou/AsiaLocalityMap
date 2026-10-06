@@ -3,18 +3,24 @@
 Source terms are recorded in docs/data-rights.html. This is not a redistribution
 tool. Downloads use .part files and check archive integrity before replacement.
 """
-import hashlib
 import json
 from pathlib import Path
 import subprocess
 import zipfile
 from datetime import datetime, timezone
 from urllib.parse import quote
+from fileutil import sha256_file
 
 ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / "data/raw"
 DV = "https://dataverse.harvard.edu/api/"
 JOBS = {
+    "korea-silla-map.jpg": "https://upload.wikimedia.org/wikipedia/commons/9/91/%E7%BB%9F%E4%B8%80%E6%96%B0%E7%BD%97%E5%9B%BE%28Unified_Silla%29.jpg",
+    "korea-goryeo-map.jpg": "https://upload.wikimedia.org/wikipedia/commons/3/3d/%E9%AB%98%E4%B8%BD%E4%BA%94%E9%81%93%E4%B8%A4%E7%95%8C%E5%9B%BE.jpg",
+    "ming-admin-1582.geojson": "https://geojsoncn.com/cn-historical-atlas/assets/mapjson-lite/admin/ming-ad1582.geojson",
+    "ming-admin-1582-source.html": "https://geojsoncn.com/cn-historical-atlas/",
+    "china-prefectures-zheng-wu.zip": "https://ndownloader.figshare.com/files/59320670",
+    "china-prefectures-zheng-wu-metadata.json": "https://api.figshare.com/v2/articles/30518417",
     "chgis-county-points.zip": DV + "access/datafile/3048165",
     "chgis-pref-points.zip": DV + "access/datafile/2970286",
     "chgis-pref-polygons.zip": DV + "access/datafile/2966510",
@@ -24,6 +30,10 @@ JOBS = {
     "README_MingGarrisons.txt": DV + "access/datafile/3007340",
     "natural-earth-land.geojson": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_land.geojson",
     "natural-earth-land-10m.geojson": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_land.geojson",
+    "natural-earth-countries-10m.geojson": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_admin_0_countries.geojson",
+    "cliopatria.geojson.zip": "https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.1/cliopatria.geojson.zip",
+    "cliopatria-LICENSE.md": "https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.1/LICENSE.md",
+    "cliopatria-README.md": "https://raw.githubusercontent.com/Seshat-Global-History-Databank/cliopatria/v0.2.1/README.md",
 }
 for stem, doi in [("chgis-county-points", "Q9VOF5"), ("chgis-pref-points", "WW1PD6"),
                   ("chgis-pref-polygons", "I0Q7SM"), ("chgis-dictionary", "SNCEAU"),
@@ -61,7 +71,7 @@ def main():
             partial.replace(path)
         verify(path)
         manifest.append({"path": str(path.relative_to(ROOT)), "url": url,
-                         "bytes": path.stat().st_size, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
+                         "bytes": path.stat().st_size, "sha256": sha256_file(path)})
         print(filename, "verified", flush=True)
     (RAW / "source-manifest.json").write_text(json.dumps({"verified_at": datetime.now(timezone.utc).isoformat(), "files": manifest}, ensure_ascii=False, indent=2))
 

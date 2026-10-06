@@ -1,0 +1,411 @@
+{
+  "year": 757,
+  "period": "silla",
+  "title": "新羅九州",
+  "source_image": "korea-silla-map.jpg",
+  "source_url": "https://commons.wikimedia.org/wiki/File:统一新罗图(Unified_Silla).jpg",
+  "download_url": "https://upload.wikimedia.org/wikipedia/commons/9/91/%E7%BB%9F%E4%B8%80%E6%96%B0%E7%BD%97%E5%9B%BE%28Unified_Silla%29.jpg",
+  "author": "GeorgeZhao",
+  "license": "CC BY-SA 3.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "map_year": 757,
+  "date_precision": "reference_year",
+  "dating_evidence": "The 2009-08-03 upload revision explicitly identifies the 757 naming reform and nine provinces.",
+  "working_width": 768,
+  "mode": "source_color_fields",
+  "regions": [
+    {
+      "name": "漢州",
+      "source_label": "漢州",
+      "pixel_label": [
+        340,
+        385
+      ]
+    },
+    {
+      "name": "朔州",
+      "source_label": "朔州",
+      "pixel_label": [
+        470,
+        375
+      ]
+    },
+    {
+      "name": "溟州",
+      "source_label": "溟州",
+      "pixel_label": [
+        570,
+        470
+      ]
+    },
+    {
+      "name": "尙州",
+      "source_label": "尙州",
+      "pixel_label": [
+        540,
+        548
+      ]
+    },
+    {
+      "name": "良州",
+      "source_label": "良州",
+      "pixel_label": [
+        620,
+        626
+      ]
+    },
+    {
+      "name": "康州",
+      "source_label": "康州",
+      "pixel_label": [
+        539,
+        655
+      ]
+    },
+    {
+      "name": "熊州",
+      "source_label": "熊州",
+      "pixel_label": [
+        418,
+        578
+      ]
+    },
+    {
+      "name": "全州",
+      "source_label": "全州",
+      "pixel_label": [
+        460,
+        628
+      ]
+    },
+    {
+      "name": "武州",
+      "source_label": "武州",
+      "pixel_label": [
+        447,
+        750
+      ]
+    }
+  ],
+  "palette": [
+    [
+      250,
+      149,
+      146
+    ],
+    [
+      177,
+      174,
+      175
+    ],
+    [
+      123,
+      187,
+      132
+    ],
+    [
+      224,
+      191,
+      130
+    ],
+    [
+      69,
+      132,
+      196
+    ],
+    [
+      208,
+      50,
+      245
+    ],
+    [
+      136,
+      211,
+      203
+    ],
+    [
+      248,
+      173,
+      6
+    ],
+    [
+      5,
+      215,
+      12
+    ],
+    [
+      90,
+      114,
+      240
+    ],
+    [
+      165,
+      253,
+      154
+    ],
+    [
+      108,
+      134,
+      12
+    ]
+  ],
+  "known_distance": 36,
+  "sea_palette_index": 9,
+  "sea_known_distance": 18,
+  "source_crop": [
+    220,
+    260,
+    650,
+    805
+  ],
+  "exclusions": [
+    [
+      625,
+      720,
+      650,
+      805
+    ]
+  ],
+  "georeferencing": {
+    "projection": "EPSG:3857",
+    "degree": 1,
+    "points": [
+      {
+        "label": "北原京 / Wonju",
+        "pixel": [
+          506,
+          474
+        ],
+        "lonlat": [
+          127.945,
+          37.349
+        ]
+      },
+      {
+        "label": "中原京 / Chungju",
+        "pixel": [
+          468,
+          500
+        ],
+        "lonlat": [
+          127.925,
+          36.991
+        ]
+      },
+      {
+        "label": "西原京 / Cheongju",
+        "pixel": [
+          474,
+          548
+        ],
+        "lonlat": [
+          127.489,
+          36.643
+        ]
+      },
+      {
+        "label": "南原京 / Namwon",
+        "pixel": [
+          474,
+          664
+        ],
+        "lonlat": [
+          127.39,
+          35.408
+        ]
+      },
+      {
+        "label": "金海京 / Gimhae",
+        "pixel": [
+          598,
+          679
+        ],
+        "lonlat": [
+          128.881,
+          35.234
+        ]
+      },
+      {
+        "label": "金城 / Gyeongju",
+        "pixel": [
+          604,
+          589
+        ],
+        "lonlat": [
+          129.224,
+          35.856
+        ]
+      },
+      {
+        "label": "鴨綠江口 / Yalu estuary",
+        "pixel": [
+          182,
+          265
+        ],
+        "lonlat": [
+          124.37,
+          39.85
+        ]
+      }
+    ]
+  },
+  "source_image_sha256": "8e044de3410ef1a134b95eee9a1f1bea68a58e43cd472657b328e39b0ba2c0fa",
+  "source_dimensions": [
+    2436,
+    2888
+  ],
+  "northern_outline": [
+    [
+      260,
+      381
+    ],
+    [
+      268,
+      377
+    ],
+    [
+      270,
+      366
+    ],
+    [
+      276,
+      361
+    ],
+    [
+      287,
+      356
+    ],
+    [
+      293,
+      345
+    ],
+    [
+      305,
+      340
+    ],
+    [
+      311,
+      335
+    ],
+    [
+      321,
+      335
+    ],
+    [
+      333,
+      329
+    ],
+    [
+      344,
+      321
+    ],
+    [
+      351,
+      312
+    ],
+    [
+      356,
+      303
+    ],
+    [
+      362,
+      294
+    ],
+    [
+      367,
+      292
+    ],
+    [
+      375,
+      291
+    ],
+    [
+      380,
+      294
+    ],
+    [
+      386,
+      294
+    ],
+    [
+      391,
+      289
+    ],
+    [
+      399,
+      286
+    ],
+    [
+      407,
+      279
+    ],
+    [
+      414,
+      279
+    ],
+    [
+      422,
+      277
+    ],
+    [
+      430,
+      273
+    ],
+    [
+      440,
+      270
+    ],
+    [
+      445,
+      270
+    ]
+  ],
+  "annotation_exclusions": [
+    [
+      [
+        622,
+        540
+      ],
+      [
+        622,
+        549
+      ],
+      [
+        629,
+        556
+      ],
+      [
+        633,
+        560
+      ],
+      [
+        632,
+        566
+      ],
+      [
+        627,
+        576
+      ],
+      [
+        633,
+        582
+      ],
+      [
+        636,
+        588
+      ],
+      [
+        642,
+        602
+      ],
+      [
+        768,
+        610
+      ],
+      [
+        768,
+        540
+      ]
+    ]
+  ]
+}

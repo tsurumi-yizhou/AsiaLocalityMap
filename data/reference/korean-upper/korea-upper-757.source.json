@@ -1,0 +1,117 @@
+{
+  "year": 757,
+  "source_url": "https://commons.wikimedia.org/wiki/File:统一新罗图(Unified_Silla).jpg",
+  "rights": "CC BY-SA 3.0; GeorgeZhao; traced and georeferenced adaptation",
+  "boundary_basis": "digitized_published_map",
+  "sha256": "659cb794f998775e73d0a9a07cdae7f41ac68ce39d147b62653f1697647e92db",
+  "source_image_sha256": "8e044de3410ef1a134b95eee9a1f1bea68a58e43cd472657b328e39b0ba2c0fa",
+  "source_image_url": "https://upload.wikimedia.org/wikipedia/commons/9/91/%E7%BB%9F%E4%B8%80%E6%96%B0%E7%BD%97%E5%9B%BE%28Unified_Silla%29.jpg",
+  "source_dimensions": [
+    2436,
+    2888
+  ],
+  "author": "GeorgeZhao",
+  "license": "CC BY-SA 3.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "map_year": 757,
+  "date_precision": "reference_year",
+  "dating_evidence": "The 2009-08-03 upload revision explicitly identifies the 757 naming reform and nine provinces.",
+  "tracing_method": "source_color_fields",
+  "trace_file": "silla.trace.json",
+  "trace_sha256": "72a5ce4c0b946c6a0fc9ab21b6f34361a33845d6814aba89faa1f0233d9709a6",
+  "georeferencing": {
+    "projection": "EPSG:3857",
+    "degree": 1,
+    "points": [
+      {
+        "label": "北原京 / Wonju",
+        "pixel": [
+          506,
+          474
+        ],
+        "lonlat": [
+          127.945,
+          37.349
+        ]
+      },
+      {
+        "label": "中原京 / Chungju",
+        "pixel": [
+          468,
+          500
+        ],
+        "lonlat": [
+          127.925,
+          36.991
+        ]
+      },
+      {
+        "label": "西原京 / Cheongju",
+        "pixel": [
+          474,
+          548
+        ],
+        "lonlat": [
+          127.489,
+          36.643
+        ]
+      },
+      {
+        "label": "南原京 / Namwon",
+        "pixel": [
+          474,
+          664
+        ],
+        "lonlat": [
+          127.39,
+          35.408
+        ]
+      },
+      {
+        "label": "金海京 / Gimhae",
+        "pixel": [
+          598,
+          679
+        ],
+        "lonlat": [
+          128.881,
+          35.234
+        ]
+      },
+      {
+        "label": "金城 / Gyeongju",
+        "pixel": [
+          604,
+          589
+        ],
+        "lonlat": [
+          129.224,
+          35.856
+        ]
+      },
+      {
+        "label": "鴨綠江口 / Yalu estuary",
+        "pixel": [
+          182,
+          265
+        ],
+        "lonlat": [
+          124.37,
+          39.85
+        ]
+      }
+    ],
+    "residual_meters": [
+      18496.151622408925,
+      30536.865849569007,
+      10259.237572576249,
+      6823.546914051091,
+      16607.693511763035,
+      13680.373292753775,
+      3015.0656644163178
+    ],
+    "rms_meters": 16468.494887351335,
+    "maximum_meters": 30536.865849569007
+  },
+  "feature_count": 9
+}

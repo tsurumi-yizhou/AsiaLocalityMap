@@ -35,9 +35,21 @@ jobs:
         shell: bash
         run: |
           # Research datasets are local only; CI checks compilation with empty assets.
-          mkdir -p data/processed/android
-          : > data/processed/android/map.jsonl
-          printf '[]\n' > data/processed/android/land.json
+          python3 - <<'PY'
+          import json, sys
+          from pathlib import Path
+          sys.path.insert(0, 'scripts')
+          from history_periods import CATALOG, YEARS, reference_years
+          out = Path('data/processed/android')
+          (out / 'snapshots').mkdir(parents=True, exist_ok=True)
+          (out / 'map.jsonl').write_text('')
+          for name in ['land.json', 'regions.json']:
+              (out / name).write_text('[]')
+          (out / 'timeline.json').write_text(json.dumps(CATALOG, ensure_ascii=False))
+          (out / 'reference-years.json').write_text(json.dumps({str(y): reference_years(y) for y in YEARS}))
+          for year in YEARS:
+              (out / 'snapshots' / f'{year}.jsonl').write_text('')
+          PY
 
       - name: Build debug APKs and run lint
         run: >-

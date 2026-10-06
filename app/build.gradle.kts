@@ -3,6 +3,13 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+val releaseVersionCode = providers.gradleProperty("releaseVersionCode").map { value ->
+    requireNotNull(value.toIntOrNull()?.takeIf { it in 1..2100000000 }) {
+        "releaseVersionCode must be an integer between 1 and 2100000000."
+    }
+}.getOrElse(1)
+val releaseVersionName = providers.gradleProperty("releaseVersionName").getOrElse("0.1.0")
+
 android {
     namespace = "asia.locality.map"
     compileSdk = 37
@@ -12,20 +19,34 @@ android {
         applicationId = "asia.locality.map"
         minSdk = 30
         targetSdk = 37
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = releaseVersionCode
+        versionName = releaseVersionName
         testInstrumentationRunner = "asia.locality.map.MapGestureProbe"
+    }
+
+    val uploadKeystorePath = providers.environmentVariable("ANDROID_KEYSTORE_PATH").orNull
+    if (!uploadKeystorePath.isNullOrBlank()) {
+        signingConfigs {
+            create("release") {
+                storeFile = file(uploadKeystorePath)
+                storePassword = providers.environmentVariable("ANDROID_KEYSTORE_PASSWORD").get()
+                keyAlias = providers.environmentVariable("ANDROID_KEY_ALIAS").get()
+                keyPassword = providers.environmentVariable("ANDROID_KEY_PASSWORD").get()
+            }
+        }
+        buildTypes.getByName("release").signingConfig = signingConfigs.getByName("release")
     }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    // Locally prepared research data is packaged only for this local demo.
+    // Offline data must be prepared before building the app.
     sourceSets.getByName("main").assets.directories.add("../data/processed/android")
     lint { abortOnError = true; warningsAsErrors = true }
 }
 dependencies {
+    testImplementation("junit:junit:4.13.2")
     implementation(platform("androidx.compose:compose-bom:2026.09.00"))
     implementation("androidx.activity:activity-compose:1.13.0")
     implementation("androidx.compose.ui:ui")
@@ -37,7 +58,7 @@ dependencies {
 
 tasks.register("verifyOfflineData") {
     doLast {
-        for (name in listOf("map.jsonl", "land.json")) {
+        for (name in listOf("map.jsonl", "land.json", "timeline.json", "regions.json", "reference-years.json")) {
             check(rootProject.file("data/processed/android/$name").isFile) {
                 "Missing offline data: $name. Run .venv/bin/python scripts/prepare_data.py first."
             }

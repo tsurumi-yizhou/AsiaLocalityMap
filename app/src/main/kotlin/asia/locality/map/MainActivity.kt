@@ -29,9 +29,19 @@ import kotlin.math.max
 
 class MainActivity : ComponentActivity(), InkMapView.Listener {
     private var map: InkMapView? = null
+    private var controlsHeight = 0
     private lateinit var locations: LocationManager
     private var data by mutableStateOf<MapData?>(null)
-    private var statusId by mutableIntStateOf(R.string.loading)
+    private var year by mutableIntStateOf(Timeline.DEFAULT_YEAR)
+    private var timeline by mutableStateOf<Timeline?>(null)
+    private var viewRegion by mutableStateOf("cn")
+    private var changingPeriod by mutableStateOf(false)
+    // Retain immutable geometry for reuse when a later context becomes eligible again.
+    // These cached features are never added to an ineligible snapshot.
+    private var fixedReferences = emptyList<MapData.Feature>()
+    private var loadGeneration = 0
+    private var pendingLoad: java.util.concurrent.Future<*>? = null
+    private var statusId by mutableStateOf<Int?>(R.string.loading)
     private var locationStatusId by mutableStateOf<Int?>(null)
     private var searchOpen by mutableStateOf(false)
     private var message by mutableStateOf<UiMessage?>(null)
@@ -54,6 +64,7 @@ class MainActivity : ComponentActivity(), InkMapView.Listener {
             current = location
             restoredViewport = null
             map?.setHere(location.longitude, location.latitude)
+            refreshHere()
             stopLocation()
             locationStatusId = null
             showAt(location.longitude, location.latitude, true)
@@ -67,6 +78,10 @@ class MainActivity : ComponentActivity(), InkMapView.Listener {
         restoredViewport = savedInstanceState?.getDoubleArray("viewport")
         selectedId = savedInstanceState?.getString("selected")
         searchOpen = savedInstanceState?.getBoolean("search") ?: false
+        val preferences = getPreferences(0)
+        year = savedInstanceState?.getInt("year")?.takeIf { it != 0 }
+            ?: preferences.getInt("year", Timeline.DEFAULT_YEAR)
+        viewRegion = savedInstanceState?.getString("region") ?: "cn"
         if (savedInstanceState?.containsKey("longitude") == true) {
             current = Location("saved-ui").apply {
                 longitude = savedInstanceState.getDouble("longitude")
@@ -76,13 +91,18 @@ class MainActivity : ComponentActivity(), InkMapView.Listener {
         setContent {
             LocalityApp(
                 data = data,
+                timeline = timeline, year = year, region = viewRegion, changingPeriod = changingPeriod,
+                onPeriod = { period -> timeline?.let { changeYear(it.contextYearFor(period, year)) } },
                 statusId = locationStatusId ?: statusId,
                 searchOpen = searchOpen,
                 message = message,
                 onMapReady = ::attachMap,
+                onControlsHeight = { controlsHeight = it; map?.setLabelTopInset(it) },
                 onMapReleased = { view ->
-                    restoredViewport = view.viewport()
-                    if (map === view) map = null
+                    if (map === view) {
+                        if (data != null && restoredViewport == null) restoredViewport = view.viewport()
+                        map = null
+                    }
                 },
                 onSearch = { searchOpen = true },
                 onCloseSearch = { searchOpen = false },
@@ -94,12 +114,18 @@ class MainActivity : ComponentActivity(), InkMapView.Listener {
         }
         worker.execute {
             try {
-                val loaded = MapData.load(this)
+                val catalogue = Timeline.load(this)
+                val requestedYear = year
+                val loaded = MapData.load(this, catalogue.restoreYear(requestedYear))
                 handler.post {
                     if (!destroyed) {
                         data = loaded
+                        fixedReferences = loaded.fixedFeatures()
+                        timeline = catalogue
+                        year = loaded.year
+                        preferences.edit { putInt("year", year) }
                         map?.let(::bindMap)
-                        if (statusId == R.string.loading) statusId = R.string.location_or_search
+                        if (statusId == R.string.loading) statusId = null
                     }
                 }
             } catch (ex: Exception) {
@@ -107,11 +133,11 @@ class MainActivity : ComponentActivity(), InkMapView.Listener {
                 handler.post { if (!destroyed) { stopLocation(); locationStatusId = null; statusId = R.string.load_failed } }
             }
         }
-        if (current == null) locate()
     }
 
     private fun attachMap(view: InkMapView) {
         map = view
+        view.setLabelTopInset(controlsHeight)
         view.listener = this
         view.post { if (!destroyed && map === view) bindMap(view) }
     }
@@ -123,14 +149,77 @@ class MainActivity : ComponentActivity(), InkMapView.Listener {
         val savedSelection = selectedId
         current?.let {
             view.setHere(it.longitude, it.latitude)
+            refreshHere()
             showAt(it.longitude, it.latitude, saved == null)
-            view.contentDescription = descriptionAt(it.longitude, it.latitude)
         }
         if (saved != null) {
             view.restoreViewport(saved)
             savedSelection?.let { id -> loaded.features.find { it.id == id }?.let(::choose) }
             restoredViewport = null
         }
+    }
+
+    private fun changeYear(value: Int) {
+        val previous = data ?: return
+        if (value == year || value !in (timeline?.years ?: emptySet())) return
+        stopLocation()
+        locationStatusId = null
+        map?.stopCamera()
+        changingPeriod = true
+        statusId = R.string.loading
+        val generation = ++loadGeneration
+        pendingLoad?.cancel(true)
+        pendingLoad = worker.submit {
+            try {
+                val loaded = MapData.load(this, value, previous.land, fixedReferences)
+                handler.post { if (!destroyed && generation == loadGeneration) applySnapshot(loaded) }
+            } catch (_: java.util.concurrent.CancellationException) {
+                // A more recent selection owns the next snapshot.
+            } catch (error: Exception) {
+                Log.e("AsiaLocalityMap", "Historical snapshot failed: $value", error)
+                handler.post {
+                    if (!destroyed && generation == loadGeneration) {
+                        changingPeriod = false
+                        statusId = R.string.load_failed
+                    }
+                }
+            }
+        }
+    }
+
+    private fun applySnapshot(loaded: MapData) {
+        val viewport = map?.viewport() ?: restoredViewport
+        val selection = selectedId
+        year = loaded.year
+        data = loaded
+        loaded.fixedFeatures().takeIf { it.isNotEmpty() }?.let { fixedReferences = it }
+        changingPeriod = false
+        getPreferences(0).edit { putInt("year", year) }
+        map?.setData(loaded)
+        selectedId = null
+        refreshHere()
+        // Keep the viewed place and zoom, including when a camera transition was in progress.
+        if (viewport != null) {
+            map?.restoreViewport(viewport)
+            showAt(viewport[0], MapData.latitude(viewport[1]), false)
+        } else {
+            statusId = null
+        }
+        loaded.features.find { it.id == selection }?.let(::choose)
+    }
+
+    override fun onViewportChanged(lon: Double, lat: Double) {
+        val view = map ?: return
+        viewRegion = timeline?.regionForViewport(lon, lat, view.viewport()[2],
+            view.height.toDouble() / view.width.coerceAtLeast(1), viewRegion) ?: viewRegion
+    }
+
+    /** Re-derive the current-location label and accessibility text from the loaded snapshot. */
+    private fun refreshHere() {
+        val loaded = data ?: return
+        val here = current ?: return
+        map?.nameHere(loaded.localAreaAt(here.longitude, here.latitude))
+        map?.contentDescription = descriptionAt(here.longitude, here.latitude)
     }
 
     private fun hasLocationPermission() =
@@ -201,42 +290,36 @@ class MainActivity : ComponentActivity(), InkMapView.Listener {
     private fun choose(feature: MapData.Feature) {
         selectedId = feature.id
         map?.select(feature)
-        statusId = if (!feature.point) 0 else when (feature.system) {
-            "军事" -> R.string.military_site_unknown_boundary
-            "土司" -> R.string.native_site_unknown_boundary
-            else -> R.string.seat_unknown_boundary
-        }
+        statusId = null
     }
 
     private fun descriptionAt(lon: Double, lat: Double): String {
         val loaded = data ?: return getString(R.string.map_description)
-        val county = loaded.countyAt(lon, lat)
-        if (county != null) return getString(R.string.current_county_description, county.name)
-        val seat = loaded.nearestCountySeat(lon, lat, 50.0)
-        return if (seat == null) getString(R.string.current_unknown_description)
-        else getString(R.string.current_nearby_description, seat.name)
+        val area = loaded.localAreaAt(lon, lat)
+        if (area != null) return getString(R.string.current_county_description, area.name)
+        val seat = loaded.nearestSeat(lon, lat, 50.0)
+        if (seat != null) return getString(R.string.current_nearby_description, seat.name)
+        return getString(R.string.current_unknown_description)
     }
 
     private fun showAt(lon: Double, lat: Double, move: Boolean) {
         val loaded = data ?: return
-        val county = loaded.countyAt(lon, lat)
-        if (county != null) {
-            choose(county)
-            if (move) { map?.nameHere(county); map?.focusCounty(lon, lat, county) }
+        val area = loaded.localAreaAt(lon, lat)
+        if (area != null) {
+            choose(area)
+            if (move) map?.focusCounty(lon, lat, area)
         } else {
-            val seat = loaded.nearestCountySeat(lon, lat, 50.0)
+            val seat = loaded.nearestSeat(lon, lat, 50.0)
             selectedId = seat?.id
             map?.select(seat)
-            statusId = if (seat == null) R.string.unknown_boundary else R.string.nearby_seat_unknown_boundary
+            statusId = null
             if (move) {
-                map?.nameHere(null)
                 val view = map
                 val aspect = if (view != null && view.height > 0) view.width.toDouble() / view.height else 1.0
                 val extent = seat?.let { 2.6 * max(abs(lon - it.lon), abs(MapData.mercator(lat) - it.y) * aspect) } ?: 1.2
                 view?.go(lon, lat, max(1.2, extent))
             }
         }
-        current?.let { map?.contentDescription = descriptionAt(it.longitude, it.latitude) }
     }
 
     private fun searchResult(feature: MapData.Feature) {
@@ -256,9 +339,11 @@ class MainActivity : ComponentActivity(), InkMapView.Listener {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putDoubleArray("viewport", map?.viewport() ?: restoredViewport)
+        outState.putDoubleArray("viewport", restoredViewport ?: map?.takeIf { data != null }?.viewport())
         outState.putString("selected", selectedId)
         outState.putBoolean("search", searchOpen)
+        outState.putInt("year", year)
+        outState.putString("region", viewRegion)
         current?.let { outState.putDouble("longitude", it.longitude); outState.putDouble("latitude", it.latitude) }
     }
     override fun onResume() {

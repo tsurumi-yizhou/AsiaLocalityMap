@@ -1,0 +1,273 @@
+{
+  "year": 1370,
+  "source_url": "https://commons.wikimedia.org/wiki/File:高丽五道两界图.jpg",
+  "rights": "CC BY-SA 4.0; Evawen; traced and georeferenced adaptation",
+  "boundary_basis": "digitized_published_map",
+  "sha256": "14f99607278ffbc269e7b5626ea417fd995c24d794d69c2b43c4c89192d88811",
+  "source_image_sha256": "5df71c852e1896ab72ee92721f6901271bec253bd94f495fcb08bd0f55a63308",
+  "source_image_url": "https://upload.wikimedia.org/wikipedia/commons/3/3d/%E9%AB%98%E4%B8%BD%E4%BA%94%E9%81%93%E4%B8%A4%E7%95%8C%E5%9B%BE.jpg",
+  "source_dimensions": [
+    437,
+    799
+  ],
+  "author": "Evawen",
+  "license": "CC BY-SA 4.0",
+  "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "map_year": null,
+  "date_precision": "historical_period",
+  "dating_evidence": "Published five-circuits/two-frontiers framework map; no exact map year supplied. 1370 is the application reference slot, not a claimed source survey year.",
+  "tracing_method": "source_boundary_lines",
+  "trace_file": "goryeo.trace.json",
+  "trace_sha256": "548f4afbabb58069829436721a4d2ce0d6195b00872c2ed5227fd5b6225eb1a3",
+  "georeferencing": {
+    "projection": "EPSG:4326",
+    "degree": 2,
+    "points": [
+      {
+        "label": "124 E / 42 N graticule",
+        "pixel": [
+          69,
+          142
+        ],
+        "lonlat": [
+          124,
+          42
+        ]
+      },
+      {
+        "label": "126 E / 42 N graticule",
+        "pixel": [
+          177,
+          145
+        ],
+        "lonlat": [
+          126,
+          42
+        ]
+      },
+      {
+        "label": "128 E / 42 N graticule",
+        "pixel": [
+          289,
+          142
+        ],
+        "lonlat": [
+          128,
+          42
+        ]
+      },
+      {
+        "label": "130 E / 42 N graticule",
+        "pixel": [
+          396,
+          134
+        ],
+        "lonlat": [
+          130,
+          42
+        ]
+      },
+      {
+        "label": "124 E / 40 N graticule",
+        "pixel": [
+          65,
+          291
+        ],
+        "lonlat": [
+          124,
+          40
+        ]
+      },
+      {
+        "label": "126 E / 40 N graticule",
+        "pixel": [
+          176,
+          294
+        ],
+        "lonlat": [
+          126,
+          40
+        ]
+      },
+      {
+        "label": "128 E / 40 N graticule",
+        "pixel": [
+          291,
+          291
+        ],
+        "lonlat": [
+          128,
+          40
+        ]
+      },
+      {
+        "label": "130 E / 40 N graticule",
+        "pixel": [
+          402,
+          283
+        ],
+        "lonlat": [
+          130,
+          40
+        ]
+      },
+      {
+        "label": "124 E / 38 N graticule",
+        "pixel": [
+          61,
+          434
+        ],
+        "lonlat": [
+          124,
+          38
+        ]
+      },
+      {
+        "label": "126 E / 38 N graticule",
+        "pixel": [
+          175,
+          442
+        ],
+        "lonlat": [
+          126,
+          38
+        ]
+      },
+      {
+        "label": "128 E / 38 N graticule",
+        "pixel": [
+          294,
+          440
+        ],
+        "lonlat": [
+          128,
+          38
+        ]
+      },
+      {
+        "label": "130 E / 38 N graticule",
+        "pixel": [
+          408,
+          432
+        ],
+        "lonlat": [
+          130,
+          38
+        ]
+      },
+      {
+        "label": "124 E / 36 N graticule",
+        "pixel": [
+          57,
+          580
+        ],
+        "lonlat": [
+          124,
+          36
+        ]
+      },
+      {
+        "label": "126 E / 36 N graticule",
+        "pixel": [
+          174,
+          589
+        ],
+        "lonlat": [
+          126,
+          36
+        ]
+      },
+      {
+        "label": "128 E / 36 N graticule",
+        "pixel": [
+          297,
+          587
+        ],
+        "lonlat": [
+          128,
+          36
+        ]
+      },
+      {
+        "label": "130 E / 36 N graticule",
+        "pixel": [
+          413,
+          579
+        ],
+        "lonlat": [
+          130,
+          36
+        ]
+      },
+      {
+        "label": "124 E / 34 N graticule",
+        "pixel": [
+          53,
+          729
+        ],
+        "lonlat": [
+          124,
+          34
+        ]
+      },
+      {
+        "label": "126 E / 34 N graticule",
+        "pixel": [
+          172,
+          738
+        ],
+        "lonlat": [
+          126,
+          34
+        ]
+      },
+      {
+        "label": "128 E / 34 N graticule",
+        "pixel": [
+          299,
+          736
+        ],
+        "lonlat": [
+          128,
+          34
+        ]
+      },
+      {
+        "label": "130 E / 34 N graticule",
+        "pixel": [
+          418,
+          728
+        ],
+        "lonlat": [
+          130,
+          34
+        ]
+      }
+    ],
+    "residual_meters": [
+      1105.4228565062028,
+      1864.94096622028,
+      2573.596765835287,
+      1296.1114737501348,
+      3422.031351079515,
+      2300.8477749020153,
+      1507.4132011469726,
+      991.9040290936697,
+      2202.5672248448495,
+      2773.3957257542825,
+      2320.6735951316214,
+      1561.7813812088432,
+      3135.9847242027386,
+      2471.954745464345,
+      3704.174677531165,
+      1133.7062102343725,
+      2078.149305428273,
+      4204.944265420499,
+      3059.390851561436,
+      1899.4967966919367
+    ],
+    "rms_meters": 2444.9001182882544,
+    "maximum_meters": 4204.944265420499
+  },
+  "feature_count": 8
+}

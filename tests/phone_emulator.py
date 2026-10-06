@@ -1,10 +1,9 @@
 """Small-screen UI regression; emulator only. Restores tablet size in finally."""
 import json
 import sys
-import re
 import time
 import xml.etree.ElementTree as ET
-from smoke_emulator import adb, ui, SCREEN
+from smoke_emulator import SCREEN, adb, bounds, capture as capture_screen, launch_at, tap_text, ui
 
 OUT = SCREEN / 'phone'
 OUT.mkdir(exist_ok=True)
@@ -13,38 +12,14 @@ quick = "--quick" in sys.argv or search_only
 report = json.loads((OUT / "results.json").read_text()) if quick and (OUT / "results.json").exists() else []
 
 
-def bounds(node):
-    return tuple(map(int, re.findall(r'\d+', node.get('bounds'))))
-
-
-def tap_text(value):
-    _, body = ui()
-    node = next(n for n in ET.fromstring(body).iter('node') if n.get('text') == value)
-    x1, y1, x2, y2 = bounds(node)
-    adb('shell', 'input', 'tap', str((x1+x2)//2), str((y1+y2)//2))
-
-
 def capture(slug):
-    texts, body = ui()
-    (OUT / f'{slug}.xml').write_bytes(body)
-    (OUT / f'{slug}.png').write_bytes(adb('exec-out', 'screencap', '-p'))
     report[:] = [r for r in report if r['screen'] != slug]
-    report.append({'screen': slug, 'texts': texts, 'screenshot': f'{slug}.png'})
-    print(slug, texts, flush=True)
-    return texts, body
+    return capture_screen(OUT, slug, report, screenshot=f'{slug}.png')
 
 
 def launch(lon, lat, expected):
-    adb('shell', 'am', 'force-stop', 'asia.locality.map')
-    adb('emu', 'geo', 'fix', str(lon), str(lat))
-    adb('shell', 'am', 'start', '-n', 'asia.locality.map/.MainActivity')
-    time.sleep(2)
-    for _ in range(8):
-        adb('emu', 'geo', 'fix', str(lon), str(lat))
-        texts, body = ui()
-        if any('当前位置历史地图' in t and expected in t for t in texts):
-            return body
-    raise AssertionError(texts)
+    return launch_at('asia.locality.map', lon, lat,
+                     lambda texts: any('当前位置历史地图' in t and expected in t for t in texts))[1]
 
 
 font_scale = adb('shell', 'settings', 'get', 'system', 'font_scale').decode().strip()
@@ -54,7 +29,7 @@ try:
         adb('shell', 'wm', 'size', f'{width}x{height}')
         adb('shell', 'wm', 'density', '320')
         adb('shell', 'settings', 'put', 'system', 'font_scale', '1.0')
-        for slug, lon, lat, name in [('nanyang',112.5283,32.9908,'南阳县'), ('kyoto',135.7681,35.0116,'葛野郡'), ('seoul',126.978,37.5665,'한성')]:
+        for slug, lon, lat, name in [('nanyang',112.5283,32.9908,'南阳府'), ('kyoto',135.7681,35.0116,'葛野郡'), ('seoul',126.978,37.5665,'漢城')]:
             if (quick and slug == 'seoul') or (search_only and slug != 'nanyang'):
                 continue
             launch(lon, lat, name)
@@ -84,7 +59,7 @@ try:
     if not search_only:
         adb('shell','wm','size','640x1136')
         adb('shell','settings','put','system','font_scale','1.3')
-        launch(112.5283,32.9908,'南阳县')
+        launch(112.5283,32.9908,'南阳府')
         capture('320-large-text')
 finally:
     if font_scale == 'null':
